@@ -1,0 +1,271 @@
+/* ═══════════════════════════════════════════════════════
+   Salt & Pepper – Stylesheet
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Reset & base ────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #1a1a2e;
+  --panel-bg:    #16213e;
+  --card-bg:     #0f3460;
+  --accent:      #e94560;
+  --salt:        #f8f0e3;
+  --salt-dark:   #d4c5a9;
+  --pepper:      #c0392b;
+  --pepper-dark: #922b21;
+  --text:        #eaeaea;
+  --text-muted:  #8899aa;
+  --cell-light:  #2c3e6d;
+  --cell-dark:   #1b2a4a;
+  --highlight:   rgba(233, 69, 96, .45);
+  --valid:       rgba(46, 204, 113, .40);
+  --protector:   #f1c40f;
+  --radius:      10px;
+}
+
+html { font-size: 16px; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.1rem; margin-bottom: .5rem; color: var(--text-muted); }
+
+.emoji { font-style: normal; }
+
+/* ── Panel containers ────────────────────────────────── */
+.panel {
+  background: var(--panel-bg);
+  border-radius: var(--radius);
+  padding: 2rem;
+  max-width: 480px;
+  width: 95vw;
+  text-align: center;
+}
+.hidden { display: none !important; }
+
+/* ── Connection panel ────────────────────────────────── */
+#connection-panel .subtitle { color: var(--text-muted); margin-bottom: 1.5rem; }
+
+.conn-section {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.id-box {
+  display: flex;
+  gap: .5rem;
+  margin-top: .6rem;
+}
+.id-box input {
+  flex: 1;
+  padding: .5rem .7rem;
+  border-radius: 6px;
+  border: 1px solid #334;
+  background: var(--bg);
+  color: var(--text);
+  font-family: monospace;
+  font-size: .95rem;
+}
+
+button {
+  padding: .55rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  font-size: .95rem;
+  cursor: pointer;
+  transition: background .2s;
+}
+button:hover { background: #d13550; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+
+#host-status, #join-status { margin-top: .5rem; font-size: .85rem; color: var(--text-muted); }
+
+/* ── Game panel ──────────────────────────────────────── */
+#game-panel {
+  max-width: 520px;
+}
+
+#game-header { margin-bottom: 1rem; }
+
+#turn-indicator {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: .6rem 0 .3rem;
+  padding: .4rem .8rem;
+  border-radius: 6px;
+  display: inline-block;
+}
+#turn-indicator.salt  { background: var(--salt-dark); color: #1a1a2e; }
+#turn-indicator.pepper { background: var(--pepper); color: #fff; }
+
+#score-bar {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  font-size: .9rem;
+  color: var(--text-muted);
+  margin-top: .4rem;
+}
+
+/* ── Board ───────────────────────────────────────────── */
+#board-container {
+  display: flex;
+  justify-content: center;
+}
+
+#board {
+  display: grid;
+  gap: 4px;
+  padding: 6px;
+  background: #111;
+  border-radius: var(--radius);
+  /* grid-template set dynamically in JS */
+}
+
+.cell {
+  width: clamp(60px, 18vw, 90px);
+  height: clamp(60px, 18vw, 90px);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: box-shadow .15s, transform .15s;
+  user-select: none;
+}
+
+.cell.light { background: var(--cell-light); }
+.cell.dark  { background: var(--cell-dark); }
+
+.cell.selected {
+  box-shadow: 0 0 0 3px var(--accent), inset 0 0 12px rgba(233, 69, 96, .3);
+  transform: scale(1.05);
+  z-index: 2;
+}
+
+.cell.valid-target {
+  box-shadow: inset 0 0 18px var(--valid);
+}
+.cell.valid-target::after {
+  content: '';
+  position: absolute;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: rgba(46, 204, 113, .6);
+}
+
+.cell.valid-target.has-piece::after {
+  width: 100%; height: 100%;
+  border-radius: 6px;
+  background: rgba(233, 69, 96, .3);
+  border: 2px solid var(--accent);
+}
+
+/* ── Pawn ────────────────────────────────────────────── */
+.pawn {
+  width: 70%;
+  height: 70%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.4rem;
+  position: relative;
+  transition: transform .15s;
+  box-shadow: 0 3px 8px rgba(0,0,0,.4);
+}
+
+.pawn.salt {
+  background: radial-gradient(circle at 35% 35%, #fff, var(--salt-dark));
+  color: #333;
+}
+
+.pawn.pepper {
+  background: radial-gradient(circle at 35% 35%, #e74c3c, var(--pepper-dark));
+  color: #fff;
+}
+
+.pawn.power-2 {
+  font-size: 1.6rem;
+  box-shadow: 0 0 12px 2px rgba(255,215,0,.5), 0 3px 8px rgba(0,0,0,.4);
+}
+
+/* protector ring */
+.pawn.protector::after {
+  content: '🛡️';
+  font-size: .7rem;
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+}
+
+/* ── Actions bar ─────────────────────────────────────── */
+#actions-bar {
+  display: flex;
+  justify-content: center;
+  gap: .8rem;
+  margin-top: 1rem;
+}
+
+#btn-protector {
+  background: var(--card-bg);
+  border: 1px solid var(--protector);
+  color: var(--protector);
+}
+#btn-protector:hover { background: rgba(241,196,15,.15); }
+
+#btn-restart {
+  background: var(--card-bg);
+  border: 1px solid var(--text-muted);
+  color: var(--text-muted);
+}
+#btn-restart:hover { background: rgba(136,153,170,.15); }
+
+/* ── Message bar ─────────────────────────────────────── */
+#message-bar {
+  margin-top: .8rem;
+  min-height: 1.5rem;
+  font-size: .9rem;
+  color: var(--accent);
+}
+
+/* ── Winner overlay ──────────────────────────────────── */
+.winner-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.winner-card {
+  background: var(--panel-bg);
+  border-radius: var(--radius);
+  padding: 2rem 3rem;
+  text-align: center;
+}
+.winner-card h2 { font-size: 1.8rem; color: var(--protector); margin-bottom: .5rem; }
+.winner-card p  { margin-bottom: 1rem; }
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 400px) {
+  .panel { padding: 1rem; }
+  .cell  { width: clamp(50px, 20vw, 70px); height: clamp(50px, 20vw, 70px); }
+  .pawn  { font-size: 1.1rem; }
+}

@@ -54,7 +54,7 @@ Since this game is hosted on a free domain, the technology stack is designed to 
 * **Hosting:** [GitHub Pages](https://pages.github.com/). It is completely free, secure, and automatically updates the live game whenever you push code to your GitHub repository.
 * **Multiplayer / Networking (PeerJS):** * Because GitHub Pages cannot run dedicated backend servers, the game uses **WebRTC** via the [PeerJS](https://peerjs.com/) library. 
   * This creates a **Peer-to-Peer (P2P)** connection directly between the two players' browsers. Player 1 "hosts" the game and gets a short ID code, and Player 2 enters that code to join. 
-
-
+Your game's placeholder will be available at:
+  https://oribraverman.github.io/Salt-And-Peper/
 
 * **Version Control:** Git & GitHub.

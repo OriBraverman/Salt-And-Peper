@@ -1,0 +1,13 @@
+{
+  "name": "salt-and-pepper",
+  "version": "1.0.0",
+  "description": "Salt & Pepper – a strategic 2-player web board game",
+  "scripts": {
+    "test": "jest --verbose"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "author": "Ben Dov Bloch",
+  "license": "MIT"
+}
