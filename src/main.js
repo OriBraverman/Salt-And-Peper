@@ -18,6 +18,7 @@
   /* ── DOM refs ──────────────────────────────────────── */
   const connPanel   = document.getElementById('connection-panel');
   const gamePanel   = document.getElementById('game-panel');
+  const btnMenu      = document.getElementById('btn-menu');
   const btnHost     = document.getElementById('btn-host');
   const btnJoin     = document.getElementById('btn-join');
   const btnLocal    = document.getElementById('btn-local');
@@ -41,6 +42,13 @@
   });
 
   /* ── Connection buttons ────────────────────────────── */
+
+  btnMenu.addEventListener('click', () => {
+    if (confirm("Return to the menu? This will end your current game.")) {
+      // Reloading ensures PeerJS connections are closed and all UI/states are reset cleanly
+      window.location.reload();
+    }
+  });
 
   btnHost.addEventListener('click', () => {
     btnHost.disabled = true;

@@ -120,6 +120,34 @@ button:disabled { opacity: .5; cursor: not-allowed; }
   margin-top: .4rem;
 }
 
+/* ── Menu Button ─────────────────────────────────────── */
+#game-header {
+  position: relative; 
+}
+
+#btn-menu {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  background: transparent;
+  font-size: 1.4rem;
+  padding: 0.2rem;
+  box-shadow: none;
+  border: none;
+}
+
+#btn-menu:hover {
+  background: transparent;
+  transform: scale(1.15);
+}
+
+@media (max-width: 400px) {
+  #btn-menu {
+    font-size: 1.2rem;
+    top: 2px;
+  }
+}
+
 /* ── Board ───────────────────────────────────────────── */
 #board-container {
   display: flex;
