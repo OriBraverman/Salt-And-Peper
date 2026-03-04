@@ -1,5 +1,6 @@
 /**
  * Salt & Pepper – PeerJS Networking
+ * Copyright (c) 2026 Ben Dov Bloch and Ori Braverman
  * -----------------------------------
  * Wraps PeerJS to provide a simple API:
  *   Network.host(onReady, onConnect, onData)

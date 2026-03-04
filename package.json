@@ -8,6 +8,6 @@
   "devDependencies": {
     "jest": "^29.7.0"
   },
-  "author": "Ben Dov Bloch",
+  "author": "Ben Dov Bloch and Ori Braverman",
   "license": "MIT"
 }

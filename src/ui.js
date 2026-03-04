@@ -1,5 +1,6 @@
 /**
  * Salt & Pepper – UI Renderer
+ * Copyright (c) 2026 Ben Dov Bloch and Ori Braverman
  * ----------------------------
  * Builds the CSS-Grid board, renders pawns, handles click interactions.
  * Depends on: GameConfig, GameLogic (loaded before this script).
@@ -95,6 +96,16 @@ const UI = (() => {
         cell.dataset.row = r;
         cell.dataset.col = c;
 
+        // Label rows on the left edge
+        if (c === 0) {
+          cell.dataset.rowLabel = GameConfig.BOARD_HEIGHT - r;
+        }
+
+        // Label columns on the bottom edge
+        if (r === GameConfig.BOARD_HEIGHT - 1) {
+          cell.dataset.colLabel = String.fromCharCode(65 + c); // A, B, C...
+        }
+
         const pawn = state.board[r][c];
         if (pawn) {
           const pawnEl = document.createElement('div');
@@ -102,7 +113,8 @@ const UI = (() => {
           pawnEl.className = `pawn ${side}` +
             (pawn.power >= 2 ? ' power-2' : '') +
             (pawn.isDefender ? ' defender' : '') +
-            (pawn.promotedParts > 0 ? ' promoted' : '');
+            (pawn.promotedParts === 1 ? ' promoted-1' : '') +
+            (pawn.promotedParts === 2 ? ' promoted-2' : '');
           pawnEl.textContent = pawn.power;
           cell.appendChild(pawnEl);
           cell.classList.add('has-piece');
@@ -169,9 +181,13 @@ const UI = (() => {
         clearSelection();
         return;
       }
-      // Clicked own pawn → reselect
+      // Clicked own pawn → deselect if it's the same, otherwise reselect
       if (clickedPawn && clickedPawn.player === state.currentPlayer) {
-        selectPawn(row, col, state);
+        if (selectedCell.row === row && selectedCell.col === col) {
+          clearSelection();
+        } else {
+          selectPawn(row, col, state);
+        }
         return;
       }
       // Clicked elsewhere → deselect

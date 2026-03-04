@@ -1,5 +1,6 @@
 /**
  * Salt & Pepper – Centralised Game Configuration
+ * Copyright (c) 2026 Ben Dov Bloch and Ori Braverman
  * ------------------------------------------------
  * Every "magic number" lives here so the rules can be tweaked in one place.
  * When running inside Node (Jest tests) we export via module.exports;

@@ -175,6 +175,45 @@ button:disabled { opacity: .5; cursor: not-allowed; }
   border: 2px solid var(--accent);
 }
 
+/* ── Coordinate Labels (Chess-style) ─────────────────── */
+
+/* Row numbers on the top-left of the cell */
+.cell[data-row-label]::before {
+  content: attr(data-row-label);
+  position: absolute;
+  top: 3px;
+  left: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  z-index: 1; /* Ensures it sits below the pawn but above the background */
+  pointer-events: none; /* Prevents interference with cell clicks */
+}
+
+/* Column letters on the bottom-right of the cell */
+.cell[data-col-label]::after {
+  content: attr(data-col-label);
+  position: absolute;
+  bottom: 2px;
+  right: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Color the labels with the contrasting cell color 
+   Uses your existing color variables from :root 
+*/
+.cell.light[data-row-label]::before,
+.cell.light[data-col-label]::after {
+  color: var(--cell-dark); 
+}
+
+.cell.dark[data-row-label]::before,
+.cell.dark[data-col-label]::after {
+  color: var(--cell-light); 
+}
+
 /* ── Pawn ────────────────────────────────────────────── */
 .pawn {
   width: 70%;
@@ -215,12 +254,21 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 }
 
 /* promoted indicator */
-.pawn.promoted::before {
+.pawn.promoted-1::before {
   content: '⭐';
   font-size: .55rem;
   position: absolute;
   top: -4px;
   left: -4px;
+}
+
+.pawn.promoted-2::before {
+  content: '⭐⭐';
+  font-size: .55rem;
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  letter-spacing: -2px; /* Adjust spacing for two stars */
 }
 
 /* ── Actions bar ─────────────────────────────────────── */

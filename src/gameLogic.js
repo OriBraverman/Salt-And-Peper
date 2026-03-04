@@ -1,5 +1,6 @@
 /**
  * Salt & Pepper – Pure Game Logic (no DOM)
+ * Copyright (c) 2026 Ben Dov Bloch and Ori Braverman
  * -----------------------------------------
  * Designed to be fully testable under Jest and usable in the browser.
  *

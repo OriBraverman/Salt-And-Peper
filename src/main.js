@@ -1,5 +1,6 @@
 /**
  * Salt & Pepper – Main entry point
+ * Copyright (c) 2026 Ben Dov Bloch and Ori Braverman
  * ----------------------------------
  * Orchestrates UI, GameLogic, and Network modules.
  */

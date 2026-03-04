@@ -1,5 +1,6 @@
 /**
  * Salt & Pepper – Comprehensive Unit Tests
+ * Copyright (c) 2026 Ben Dov Bloch and Ori Braverman
  * ------------------------------------------
  * Covers every rule described in the updated README.md:
  *   1. Initial state & pawn data model
