@@ -1,7 +1,7 @@
 # Salt & Pepper 🧂🌶️
 
 **Game Design & Concept by:** Ben Dov Bloch  
-**Game Development by:** Ori Braverman
+**Game Development by:** Ori Braverman  
 **Platform:** Web Multiplayer (Hosted on GitHub Pages)
 
 Welcome to **Salt & Pepper**, a strategic 2-player board game where positioning, merging, and defending are the keys to victory!
