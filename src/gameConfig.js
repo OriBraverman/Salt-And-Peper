@@ -39,15 +39,17 @@ const GameConfig = Object.freeze({
   // PLAYER_2_START_ROW is derived: BOARD_HEIGHT - 1
 
   /* ── Capture rules ─────────────────────────────────────── */
-  // Standard capture:   attacker >= defender
-  // Protector capture:  attacker >  defender  (ties fail)
+  // Standard capture:  attacker power >= enemy attacker power
+  // Defenders are INVINCIBLE – cannot be captured or moved into.
 
   /* ── Merging ───────────────────────────────────────────── */
-  // Only two pawns of power 1 can merge (1+1 = 2).
+  // Only two attacker pawns of power 1 can merge (1+1 = 2).
   // Merged result must not exceed MAX_POWER_LEVEL.
 
-  /* ── Protector ─────────────────────────────────────────── */
-  MAX_PROTECTORS_PER_PLAYER: 1,
+  /* ── Defender ──────────────────────────────────────────── */
+  // Only power-1 pawns can become defenders.
+  // Becoming a defender or reverting to attacker each costs one turn.
+  // Defenders are invincible and act as absolute roadblocks.
 });
 
 // ── Export for both Node and browser ────────────────────────

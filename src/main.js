@@ -32,7 +32,12 @@
      Boot
      ============================================================ */
 
-  UI.init({ onMove: handleMove, onProtector: handleProtector });
+  UI.init({
+    onMove: handleMove,
+    onDefender: handleDefender,
+    onAttacker: handleAttacker,
+    onUnmerge: handleUnmerge,
+  });
 
   /* ── Connection buttons ────────────────────────────── */
 
@@ -114,7 +119,6 @@
   /* ── Moves ─────────────────────────────────────────── */
 
   function handleMove (fromR, fromC, toR, toC) {
-    // Online guard: only allow moves on your turn
     if (isOnline && gameState.currentPlayer !== localPlayer) {
       UI.showMessage("It's not your turn!");
       return;
@@ -131,26 +135,24 @@
     UI.clearMessage();
     refreshUI();
 
-    // Broadcast move to peer
     if (isOnline) {
       Network.send({ type: 'move', fromR, fromC, toR, toC });
     }
 
-    // Win check
     if (gameState.winner) {
       UI.showWinner(gameState.winner);
     }
   }
 
-  /* ── Protector ─────────────────────────────────────── */
+  /* ── Unmerge ───────────────────────────────────────── */
 
-  function handleProtector (row, col) {
+  function handleUnmerge (fromR, fromC, toR, toC) {
     if (isOnline && gameState.currentPlayer !== localPlayer) {
       UI.showMessage("It's not your turn!");
       return;
     }
 
-    const result = GameLogic.setProtector(gameState, row, col);
+    const result = GameLogic.executeUnmerge(gameState, fromR, fromC, toR, toC);
     if (!result.success) {
       UI.showMessage(result.reason);
       return;
@@ -161,7 +163,57 @@
     refreshUI();
 
     if (isOnline) {
-      Network.send({ type: 'protector', row, col });
+      Network.send({ type: 'unmerge', fromR, fromC, toR, toC });
+    }
+
+    if (gameState.winner) {
+      UI.showWinner(gameState.winner);
+    }
+  }
+
+  /* ── Defender ──────────────────────────────────────── */
+
+  function handleDefender (row, col) {
+    if (isOnline && gameState.currentPlayer !== localPlayer) {
+      UI.showMessage("It's not your turn!");
+      return;
+    }
+
+    const result = GameLogic.setDefender(gameState, row, col);
+    if (!result.success) {
+      UI.showMessage(result.reason);
+      return;
+    }
+
+    gameState = result.state;
+    UI.clearMessage();
+    refreshUI();
+
+    if (isOnline) {
+      Network.send({ type: 'defender', row, col });
+    }
+  }
+
+  /* ── Attacker ──────────────────────────────────────── */
+
+  function handleAttacker (row, col) {
+    if (isOnline && gameState.currentPlayer !== localPlayer) {
+      UI.showMessage("It's not your turn!");
+      return;
+    }
+
+    const result = GameLogic.setAttacker(gameState, row, col);
+    if (!result.success) {
+      UI.showMessage(result.reason);
+      return;
+    }
+
+    gameState = result.state;
+    UI.clearMessage();
+    refreshUI();
+
+    if (isOnline) {
+      Network.send({ type: 'attacker', row, col });
     }
   }
 
@@ -181,8 +233,27 @@
         break;
       }
 
-      case 'protector': {
-        const result = GameLogic.setProtector(gameState, data.row, data.col);
+      case 'unmerge': {
+        const result = GameLogic.executeUnmerge(gameState, data.fromR, data.fromC, data.toR, data.toC);
+        if (result.success) {
+          gameState = result.state;
+          refreshUI();
+          if (gameState.winner) UI.showWinner(gameState.winner);
+        }
+        break;
+      }
+
+      case 'defender': {
+        const result = GameLogic.setDefender(gameState, data.row, data.col);
+        if (result.success) {
+          gameState = result.state;
+          refreshUI();
+        }
+        break;
+      }
+
+      case 'attacker': {
+        const result = GameLogic.setAttacker(gameState, data.row, data.col);
         if (result.success) {
           gameState = result.state;
           refreshUI();
@@ -198,4 +269,5 @@
         console.warn('[Main] Unknown network message:', data);
     }
   }
+
 })();

@@ -9,36 +9,46 @@
 
 const UI = (() => {
   /* ── DOM refs (set once in init) ─────────────────────── */
-  let boardEl, turnEl, scoreP1El, scoreP2El, msgEl, protectorBtn;
+  let boardEl, turnEl, scoreP1El, scoreP2El, msgEl;
+  let defenderBtn, attackerBtn, unmergeBtn;
 
   /* ── Selection state ─────────────────────────────────── */
   let selectedCell = null;      // { row, col }
   let validTargets = [];        // [{ fromR, fromC, toR, toC, type }]
+  let unmergeMode = false;      // when true, clicking a target performs unmerge
 
   /* ── Callback provided by main.js ───────────────────── */
-  let onMoveCallback = null;    // (fromR, fromC, toR, toC) => void
-  let onProtectorCallback = null; // (row, col) => void
+  let onMoveCallback = null;       // (fromR, fromC, toR, toC) => void
+  let onDefenderCallback = null;   // (row, col) => void
+  let onAttackerCallback = null;   // (row, col) => void
+  let onUnmergeCallback = null;    // (fromR, fromC, toR, toC) => void
 
   /* ============================================================
      Public API
      ============================================================ */
 
-  function init ({ onMove, onProtector }) {
+  function init ({ onMove, onDefender, onAttacker, onUnmerge }) {
     boardEl      = document.getElementById('board');
     turnEl       = document.getElementById('turn-indicator');
     scoreP1El    = document.getElementById('score-p1');
     scoreP2El    = document.getElementById('score-p2');
     msgEl        = document.getElementById('message-bar');
-    protectorBtn = document.getElementById('btn-protector');
+    defenderBtn  = document.getElementById('btn-defender');
+    attackerBtn  = document.getElementById('btn-attacker');
+    unmergeBtn   = document.getElementById('btn-unmerge');
 
-    onMoveCallback      = onMove;
-    onProtectorCallback = onProtector;
+    onMoveCallback     = onMove;
+    onDefenderCallback = onDefender;
+    onAttackerCallback = onAttacker;
+    onUnmergeCallback  = onUnmerge;
 
     // Build grid template
     boardEl.style.gridTemplateColumns = `repeat(${GameConfig.BOARD_WIDTH}, 1fr)`;
     boardEl.style.gridTemplateRows    = `repeat(${GameConfig.BOARD_HEIGHT}, 1fr)`;
 
-    protectorBtn.addEventListener('click', handleProtectorClick);
+    defenderBtn.addEventListener('click', handleDefenderClick);
+    attackerBtn.addEventListener('click', handleAttackerClick);
+    unmergeBtn.addEventListener('click', handleUnmergeClick);
   }
 
   /** Full render of board + HUD from a state object. */
@@ -91,7 +101,8 @@ const UI = (() => {
           const side = pawn.player === GameConfig.PLAYER_1 ? 'salt' : 'pepper';
           pawnEl.className = `pawn ${side}` +
             (pawn.power >= 2 ? ' power-2' : '') +
-            (pawn.isProtector ? ' protector' : '');
+            (pawn.isDefender ? ' defender' : '') +
+            (pawn.promotedParts > 0 ? ' promoted' : '');
           pawnEl.textContent = pawn.power;
           cell.appendChild(pawnEl);
           cell.classList.add('has-piece');
@@ -118,11 +129,20 @@ const UI = (() => {
     scoreP1El.textContent = `🧂 Salt: ${state.pieceCounts[GameConfig.PLAYER_1]}`;
     scoreP2El.textContent = `🌶️ Pepper: ${state.pieceCounts[GameConfig.PLAYER_2]}`;
 
-    // Protector button state
-    if (localPlayer !== null && state.currentPlayer !== localPlayer) {
-      protectorBtn.disabled = true;
-    } else {
-      protectorBtn.disabled = !selectedCell;
+    const isMyTurn = localPlayer === null || state.currentPlayer === localPlayer;
+
+    // Action button states
+    defenderBtn.disabled = true;
+    attackerBtn.disabled = true;
+    unmergeBtn.disabled = true;
+
+    if (isMyTurn && selectedCell) {
+      const pawn = state.board[selectedCell.row][selectedCell.col];
+      if (pawn && pawn.player === state.currentPlayer) {
+        if (!pawn.isDefender && pawn.power === 1) defenderBtn.disabled = false;
+        if (pawn.isDefender) attackerBtn.disabled = false;
+        if (!pawn.isDefender && pawn.power === GameConfig.MAX_POWER_LEVEL) unmergeBtn.disabled = false;
+      }
     }
   }
 
@@ -138,10 +158,14 @@ const UI = (() => {
 
     // ── If a pawn is already selected ──
     if (selectedCell) {
-      // Clicked a valid target → execute the move
+      // Clicked a valid target → execute the move/unmerge
       const target = validTargets.find(t => t.toR === row && t.toC === col);
       if (target) {
-        if (onMoveCallback) onMoveCallback(selectedCell.row, selectedCell.col, row, col);
+        if (unmergeMode) {
+          if (onUnmergeCallback) onUnmergeCallback(selectedCell.row, selectedCell.col, row, col);
+        } else {
+          if (onMoveCallback) onMoveCallback(selectedCell.row, selectedCell.col, row, col);
+        }
         clearSelection();
         return;
       }
@@ -164,38 +188,88 @@ const UI = (() => {
   function selectPawn (row, col, state) {
     clearSelection();
     selectedCell = { row, col };
+    unmergeMode = false;
 
     // Highlight selected cell
     getCellEl(row, col)?.classList.add('selected');
 
-    // Find valid targets
+    // Find valid move targets (not unmerge — that requires the unmerge button)
     validTargets = GameLogic.getValidMoves(state)
-      .filter(m => m.fromR === row && m.fromC === col);
+      .filter(m => m.fromR === row && m.fromC === col && m.type !== 'unmerge'
+                 && m.type !== 'setDefender' && m.type !== 'setAttacker');
 
     validTargets.forEach(t => {
       getCellEl(t.toR, t.toC)?.classList.add('valid-target');
     });
 
-    // Enable protector button if applicable
-    if (protectorBtn) protectorBtn.disabled = false;
+    // Update action button states
+    const pawn = state.board[row][col];
+    if (pawn) {
+      defenderBtn.disabled = !(pawn.power === 1 && !pawn.isDefender);
+      attackerBtn.disabled = !pawn.isDefender;
+      unmergeBtn.disabled = !(pawn.power === GameConfig.MAX_POWER_LEVEL && !pawn.isDefender);
+    }
+  }
+
+  function enterUnmergeMode (state) {
+    if (!selectedCell) return;
+
+    // Clear current highlights
+    boardEl?.querySelectorAll('.valid-target').forEach(el => {
+      el.classList.remove('valid-target');
+    });
+
+    unmergeMode = true;
+
+    // Find valid unmerge targets
+    validTargets = GameLogic.getValidMoves(state)
+      .filter(m => m.fromR === selectedCell.row && m.fromC === selectedCell.col
+                 && m.type === 'unmerge');
+
+    validTargets.forEach(t => {
+      getCellEl(t.toR, t.toC)?.classList.add('valid-target');
+    });
   }
 
   function clearSelection () {
     selectedCell = null;
     validTargets = [];
+    unmergeMode = false;
     boardEl?.querySelectorAll('.selected, .valid-target').forEach(el => {
       el.classList.remove('selected', 'valid-target');
     });
-    if (protectorBtn) protectorBtn.disabled = true;
+    if (defenderBtn) defenderBtn.disabled = true;
+    if (attackerBtn) attackerBtn.disabled = true;
+    if (unmergeBtn) unmergeBtn.disabled = true;
   }
 
-  function handleProtectorClick () {
+  function handleDefenderClick () {
     if (!selectedCell) return;
-    if (onProtectorCallback) {
-      onProtectorCallback(selectedCell.row, selectedCell.col);
+    if (onDefenderCallback) {
+      onDefenderCallback(selectedCell.row, selectedCell.col);
     }
     clearSelection();
   }
+
+  function handleAttackerClick () {
+    if (!selectedCell) return;
+    if (onAttackerCallback) {
+      onAttackerCallback(selectedCell.row, selectedCell.col);
+    }
+    clearSelection();
+  }
+
+  function handleUnmergeClick () {
+    if (!selectedCell) return;
+    // Enter unmerge mode: show unmerge targets
+    // We need current state — pass it via a stored reference
+    if (_currentState) {
+      enterUnmergeMode(_currentState);
+    }
+  }
+
+  /* ── State reference for unmerge mode ──────────────── */
+  let _currentState = null;
 
   /* ── Helpers ───────────────────────────────────────── */
 
@@ -203,8 +277,15 @@ const UI = (() => {
     return boardEl?.querySelector(`[data-row="${r}"][data-col="${c}"]`);
   }
 
+  /* Override render to store state reference */
+  function renderWithState (state, localPlayer) {
+    _currentState = state;
+    renderBoard(state, localPlayer);
+    renderHUD(state, localPlayer);
+  }
+
   /* ── Public surface ────────────────────────────────── */
-  return { init, render, showMessage, clearMessage, showWinner };
+  return { init, render: renderWithState, showMessage, clearMessage, showWinner };
 })();
 
 if (typeof module !== 'undefined' && module.exports) {

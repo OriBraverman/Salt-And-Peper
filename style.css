@@ -20,7 +20,7 @@
   --cell-dark:   #1b2a4a;
   --highlight:   rgba(233, 69, 96, .45);
   --valid:       rgba(46, 204, 113, .40);
-  --protector:   #f1c40f;
+  --defender:    #f1c40f;
   --radius:      10px;
 }
 
@@ -205,13 +205,22 @@ button:disabled { opacity: .5; cursor: not-allowed; }
   box-shadow: 0 0 12px 2px rgba(255,215,0,.5), 0 3px 8px rgba(0,0,0,.4);
 }
 
-/* protector ring */
-.pawn.protector::after {
+/* defender ring */
+.pawn.defender::after {
   content: '🛡️';
   font-size: .7rem;
   position: absolute;
   bottom: -4px;
   right: -4px;
+}
+
+/* promoted indicator */
+.pawn.promoted::before {
+  content: '⭐';
+  font-size: .55rem;
+  position: absolute;
+  top: -4px;
+  left: -4px;
 }
 
 /* ── Actions bar ─────────────────────────────────────── */
@@ -222,12 +231,12 @@ button:disabled { opacity: .5; cursor: not-allowed; }
   margin-top: 1rem;
 }
 
-#btn-protector {
+#btn-defender, #btn-attacker, #btn-unmerge {
   background: var(--card-bg);
-  border: 1px solid var(--protector);
-  color: var(--protector);
+  border: 1px solid var(--defender);
+  color: var(--defender);
 }
-#btn-protector:hover { background: rgba(241,196,15,.15); }
+#btn-defender:hover, #btn-attacker:hover, #btn-unmerge:hover { background: rgba(241,196,15,.15); }
 
 #btn-restart {
   background: var(--card-bg);
@@ -260,7 +269,7 @@ button:disabled { opacity: .5; cursor: not-allowed; }
   padding: 2rem 3rem;
   text-align: center;
 }
-.winner-card h2 { font-size: 1.8rem; color: var(--protector); margin-bottom: .5rem; }
+.winner-card h2 { font-size: 1.8rem; color: var(--defender); margin-bottom: .5rem; }
 .winner-card p  { margin-bottom: 1rem; }
 
 /* ── Responsive ──────────────────────────────────────── */
